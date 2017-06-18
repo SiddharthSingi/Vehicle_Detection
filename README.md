@@ -40,7 +40,7 @@ You're reading it!
 
 ####1. Explain how (and identify where in your code) you extracted HOG features from the training images.
 
-The code for this step is contained in the first code cell of the IPython notebook (or in lines # through # of the file called `some_file.py`).  
+The code for this step is contained in the second code cell of the IPython notebook Vehicle_Detection.ipynb
 
 I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
@@ -55,23 +55,38 @@ Here is an example using the `YCrCb` color space and HOG parameters of `orientat
 
 ####2. Explain how you settled on your final choice of HOG parameters.
 
-I tried various combinations of parameters and...
+I tried various combinations of parameters. I tested with diffeerent color spaces like HLS, RGB, YUV, YCrCb and YCrCb worked the best for me. Other parameters I tried were orient=9, and pix_per_cell=16, but both did not help me so I used the default values.
 
 ####3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
-I trained a linear SVM using...
+I trained a linear SVM using the following parameters in the 4th code cell of my IPython Shell:
+
+* color_space = 'YCrCb'
+* spatial_size = (16, 16)
+* hist_bins = 32
+* orient = 8
+* pix_per_cell = 8
+* cell_per_block = 2
+* hog_channel = "ALL"
+* spatial_feat=True
+* hist_feat=True
+* hog_feat=True
+
+First, I created a list of all filenames of all car and notcar images. Then using the extract features function(defined in the 2nd code cell) for each of these images I formed their feature vectors consisting of spatial features, histogram features and hog features. These feature_vectors were then fitted to a LinearSVC() classifier and trained to get an test accuracy of 99.4%
+
 
 ###Sliding Window Search
 
 ####1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
-I decided to search random window positions at random scales all over the image and came up with this (ok just kidding I didn't actually ;):
+The sliding_window search was implemented in the pipeline() function defined in the 8th code cell.
+I tried to change the parameters of the size of the windows, initially I thought of using smaller windows near the horizon and larger windows closer to the car, but unexpectadly that did not yield in any good test results so I decided to use (64, 64) sized windows between y_start_stop = [400, 680].
 
 ![alt text][image3]
 
 ####2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
-Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
+Ultimately I searched on three scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
 
 ![alt text][image4]
 ---
@@ -106,5 +121,8 @@ Here's an example result showing the heatmap from a series of frames of video, t
 
 ####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+Before trying sliding window search I tried to use the hog sub-sampling method to identify the car windows, but this function identified many continous false positives next to each other either on the lane markings or the opposite side of the road. This made it difficult for me to use an appropriate threshold for heatmaps to avoid the false positives and hence I had to switch to the sliding window method.
 
+To make the pipeline more robust an algorithm must be employed that uses the fact that a heatmap point or a vehicle cannot be found in the middle of the road all of a sudden i.e an averaging technique for frames should be considered one like in the Advanced Lane Finding project. Also if a vehicle is detected then it must either increase in size if moving ahead, or reduce in size if moving closer to the bottom edge of the screen.
+
+These methods can give the final touches to this project and minimize false positives being generated.
