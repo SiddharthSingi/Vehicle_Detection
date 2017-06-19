@@ -44,14 +44,17 @@ The code for this step is contained in the second code cell of the IPython noteb
 
 I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
-![alt text][image1]
+![carhog](https://user-images.githubusercontent.com/26694585/27286431-bd324bbe-551d-11e7-9fbd-e266148b43cd.jpg)
+
+![notcarhog](https://user-images.githubusercontent.com/26694585/27286435-bfb9fbfc-551d-11e7-858e-6aebe1d7939d.jpg)
+
 
 I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
 
 Here is an example using the `YCrCb` color space and HOG parameters of `orientations=8`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`:
 
 
-![alt text][image2]
+![ycarhog](https://user-images.githubusercontent.com/26694585/27286455-d4ab255e-551d-11e7-88f3-3fedd0160f78.jpg)
 
 ####2. Explain how you settled on your final choice of HOG parameters.
 
@@ -80,38 +83,34 @@ First, I created a list of all filenames of all car and notcar images. Then usin
 ####1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
 The sliding_window search was implemented in the pipeline() function defined in the 8th code cell.
-I tried to change the parameters of the size of the windows, initially I thought of using smaller windows near the horizon and larger windows closer to the car, but unexpectadly that did not yield in any good test results so I decided to use (64, 64) sized windows between y_start_stop = [400, 680].
+I tried to change the parameters of the size of the windows, To reduce excessive windows, I used smaller windows near the horizon and larger windows closer to the car, The final scales to search were: (64, 64) sized windows between y_start_stop = [400, 530], and (128, 128) sized windows between y_start_stop = [400, 680]
 
-![alt text][image3]
+![sliding_windows](https://user-images.githubusercontent.com/26694585/27286486-f37b574c-551d-11e7-94a3-c91c6872625c.jpg)
+
 
 ####2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
-
+ 
 Ultimately I searched on three scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
 
-![alt text][image4]
----
+![test3](https://user-images.githubusercontent.com/26694585/27286518-0ddd108a-551e-11e7-9a86-5376473927ca.jpg)
+
+![test4](https://user-images.githubusercontent.com/26694585/27286522-0fd50474-551e-11e7-845d-5f2f4fac1441.jpg)
+
+![test5](https://user-images.githubusercontent.com/26694585/27286523-11d7c63a-551e-11e7-8bb0-33f6e82d640d.jpg)
 
 ### Video Implementation
 
 ####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./project_video.mp4)
+Here's a link: [https://youtu.be/Kr-2pmElJCI](link)
 
 
 ####2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
 I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
 
-Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
+## Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
 
-### Here are six frames and their corresponding heatmaps:
-
-![alt text][image5]
-
-### Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:
-![alt text][image6]
-
-### Here the resulting bounding boxes are drawn onto the last frame in the series:
-![alt text][image7]
+![heatmap](https://user-images.githubusercontent.com/26694585/27286593-5ed53e54-551e-11e7-8ce6-250ba87635c8.jpg)
 
 
 
@@ -123,4 +122,4 @@ Here's an example result showing the heatmap from a series of frames of video, t
 
 Before trying sliding window search I tried to use the hog sub-sampling method to identify the car windows, but this function identified many continous false positives next to each other either on the lane markings or the opposite side of the road. This made it difficult for me to use an appropriate threshold for heatmaps to avoid the false positives and hence I had to switch to the sliding window method.
 
-To make the pipeline more robust an algorithm must be employed that uses the fact that a heatmap point or a vehicle cannot be found in the middle of the road all of a sudden i.e an averaging technique for frames should be considered one like in the Advanced Lane Finding project. Also if a vehicle is detected then it must either increase in size if moving ahead, or reduce in size if moving closer to the bottom edge of the screen. These methods can give the final touches to this project and minimize any false positives that are being generated.
+To make the pipeline more robust an algorithm must be employed that uses the fact that a heatmap point or a vehicle cannot be found in the middle of the road all of a sudden. Also if a vehicle is detected then it must either increase in size if moving ahead, or reduce in size if moving closer to the bottom edge of the screen. These methods can give the final touches to this project and minimize any false positives that are being generated.
